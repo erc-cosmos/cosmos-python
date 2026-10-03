@@ -1,0 +1,10 @@
+.pixi/
+.tools/
+.cache/
+__pycache__/
+.DS_Store
+.idea/
+.vscode/
+*.py[cod]
+.env
+.env.*

@@ -162,7 +162,7 @@ Pixi tool constraint may migrate automatically. Do not substitute the starter's
 Python version or dependencies into an established research environment. After
 updating, run bootstrap and locked setup, then relevant tests. Report backups,
 conflicts, and any untested platforms. Template publication and Git commits/pushes
-still require the user's request. See README for batch and recovery behaviour.
+still require the user's request. See GUIDE.md for batch and recovery behaviour.
 
 When changing managed files, increment template-version.txt, keep metadata schema
 compatibility, and run both installer and update tests. Test preservation of

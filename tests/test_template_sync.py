@@ -27,7 +27,7 @@ class UpdateTests(unittest.TestCase):
         shutil.copy2(SOURCE / 'templates/COSMOS-TOOLS.md', self.source / 'templates/COSMOS-TOOLS.md')
         self.target = self.root / 'Example With Spaces'
         self.target.mkdir()
-        files, before, suffix = setup_repo.plan(self.target, '3.11')
+        files, before, suffix = setup_repo.plan(self.target, '3.14')
         setup_repo.install_files(self.target, files, before, suffix)
 
     def change(self):

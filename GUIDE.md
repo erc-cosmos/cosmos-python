@@ -78,7 +78,7 @@ Run each project's tests and review/commit the resulting helper and metadata cha
 
 The root `pixi.toml` and `pixi.lock` define the standalone distribution installed
 inside your cosmos-python clone. The standalone default is Python 3.14; the
-reusable project template stays on Python 3.11 unless a version is selected.
+reusable project template also defaults to Python 3.14 unless a version is selected.
 `install.sh` / `install.ps1` bootstraps Pixi and
 installs that saved environment in one command; no existing Python is required.
 It can be used interactively or to execute scripts outside a project. Activation
@@ -122,7 +122,7 @@ The installer adds the install, bootstrap, cosmos, update, and activation script
 The workspace name comes from the target directory name. It appends missing ignore
 rules while preserving existing README and package metadata.
 
-For default Python 3.11, it copies the starter lockfile; another Python minor
+For default Python 3.14, it copies the starter lockfile; another Python minor
 version gets a new lockfile when installation runs. Existing requirements files
 are not imported automatically. Project-specific packages must be added and tested.
 
@@ -308,4 +308,5 @@ Upstream references: [Pixi installation](https://pixi.sh/latest/installation/),
 
 Standalone Python was subsequently upgraded to 3.14.8 on 7 October 2026.
 Locked installation and all 17 installer/updater tests passed on the development
-Mac under Python 3.14. The separate project template remains on Python 3.11.
+Mac under Python 3.14. The separate project template now also defaults to Python 3.14. Existing project
+environments keep their own Python version.

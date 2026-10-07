@@ -40,8 +40,8 @@ source ./activate.sh
 pixi run --locked python your_script.py
 ```
 
-Replace the example paths with your own. Add `--python 3.12` to the setup command
-if the project needs that Python version. Then add its packages as described below.
+Replace the example paths with your own. New projects default to Python 3.14.
+Add `--python 3.11` to the setup command if a project needs an older version. Then add its packages as described below.
 
 For a project already configured by a colleague, run `bash install.sh` inside
 that project instead of running `setup-repo.sh` again.

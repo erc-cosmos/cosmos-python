@@ -1,7 +1,8 @@
 # Python environment
 
 This repository uses Pixi, with its own Python and packages. No system Python is
-needed. The starter initially includes only Python: a maintainer must add the
+needed. New projects default to Python 3.14 unless another version is selected.
+The starter initially includes only Python: a maintainer must add the
 project's dependencies and validate its code before distributing it as ready to use.
 
 ## First setup (also for collaborators)

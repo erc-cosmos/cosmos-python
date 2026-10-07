@@ -21,8 +21,9 @@ class UpdateTests(unittest.TestCase):
         self.source = self.root / 'template'
         self.source.mkdir()
         (self.source / 'templates').mkdir()
-        for name in (*sync.HELPERS, 'pixi.toml', 'template-version.txt'):
+        for name in (*sync.HELPERS, *sync.INSTALLERS, 'template-version.txt'):
             shutil.copy2(SOURCE / name, self.source / name)
+        shutil.copy2(SOURCE / 'templates/pixi.toml', self.source / 'templates/pixi.toml')
         shutil.copy2(SOURCE / 'templates/COSMOS-TOOLS.md', self.source / 'templates/COSMOS-TOOLS.md')
         self.target = self.root / 'Example With Spaces'
         self.target.mkdir()
@@ -68,7 +69,7 @@ class UpdateTests(unittest.TestCase):
             sync.plan_update(self.source,self.target,True)
 
     def test_tool_version_migration_preserves_dependencies(self):
-        p=self.source/'pixi.toml'
+        p=self.source/'templates/pixi.toml'
         p.write_text(p.read_text().replace('==0.81.0','==0.82.0'))
         p=self.target/'pixi.toml'
         original=p.read_bytes()
@@ -77,6 +78,22 @@ class UpdateTests(unittest.TestCase):
         p.write_bytes(original.replace(b'==0.81.0',b'>=0.80'))
         with self.assertRaisesRegex(ValueError,'locally customized'):
             sync.plan_update(self.source,self.target)
+
+    def test_previous_release_receives_installers_without_dependency_changes(self):
+        state=json.loads((self.target/sync.STATE).read_text())
+        state['template_version']='1.1.0'
+        for name in sync.INSTALLERS:
+            del state['files'][name]
+            (self.target/name).unlink()
+        (self.target/sync.STATE).write_text(json.dumps(state))
+        manifest=(self.target/'pixi.toml').read_bytes()
+        lock=(self.target/'pixi.lock').read_bytes()
+        plan=sync.plan_update(self.source,self.target)
+        self.assertTrue(all(name in plan for name in sync.INSTALLERS))
+        sync.apply_update(self.target,plan)
+        self.assertEqual((self.target/'pixi.toml').read_bytes(),manifest)
+        self.assertEqual((self.target/'pixi.lock').read_bytes(),lock)
+        self.assertEqual(sync.plan_update(self.source,self.target),{})
 
     def test_symlink_refused(self):
         self.change()

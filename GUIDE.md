@@ -8,11 +8,24 @@ Windows, advanced options, how updates work, and troubleshooting.
 Use PowerShell and adjust the paths below to your machine. An internet connection
 is required for initial downloads; you do not need Python installed beforehand.
 
-### Get the tools and set up a project
+### Install standalone Python
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\github.com\erc-cosmos" | Out-Null
 git clone https://github.com/erc-cosmos/cosmos-python.git "$HOME\github.com\erc-cosmos\cosmos-python"
+cd "$HOME\github.com\erc-cosmos\cosmos-python"
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+. .\activate.ps1
+pixi run --locked python --version
+pixi run --locked python
+```
+
+To run an external script, use `pixi run --locked python C:\path\your_script.py`.
+Add packages with `cosmos.ps1 add` as below, running from the cosmos-python directory.
+
+### Install Python for a project
+
+```powershell
 powershell -ExecutionPolicy Bypass -File "$HOME\github.com\erc-cosmos\cosmos-python\setup-repo.ps1" -Repository "C:\work\my-repo"
 ```
 
@@ -61,6 +74,40 @@ git -C "$HOME\github.com\erc-cosmos\cosmos-python" pull --ff-only
 For installations without `.cosmos-python.json`, add `-Adopt` to both commands.
 Run each project's tests and review/commit the resulting helper and metadata changes.
 
+## Standalone and project environments
+
+The root `pixi.toml` and `pixi.lock` define the standalone distribution installed
+inside your cosmos-python clone. `install.sh` / `install.ps1` bootstraps Pixi and
+installs that saved environment in one command; no existing Python is required.
+It can be used interactively or to execute scripts outside a project. Activation
+makes Pixi available; use `pixi run --locked python`, not an unrelated system Python.
+For an editor, select `.pixi/envs/default/bin/python` on Mac/Linux or
+`.pixi\envs\default\python.exe` on Windows. On Windows, prefer the Pixi wrapper for
+execution so environment variables and native-library paths are activated correctly.
+
+The project installer uses the separate Python-only template at
+`templates/pixi.toml` and `templates/pixi.lock`. Adding personal packages to the
+root standalone environment does not add them to future project environments.
+Each project can choose its own Python version and packages; it does not depend
+on the standalone environment at runtime after installation.
+
+The installer/updater launchers use the standalone Python to run their tooling,
+which requires Python 3.11 or later. Keep that requirement if using this clone to
+manage projects, even when a target itself needs Python 3.9 or 3.10. If you change
+root dependencies, run update before using the launchers again.
+
+`install` always uses the saved lockfile and refuses inconsistent requirements;
+use `update.sh` / `update.ps1` intentionally after editing requirements. For an
+unchanged standalone checkout, pull and rerun install to apply published updates.
+If you customized its root manifest/lockfile, preserve and reconcile those Git
+changes before pulling; the installer does not overwrite them. Repository updater
+commands target other repositories, not the cosmos-python clone itself.
+
+A script's relative data paths are resolved in the Pixi workspace directory.
+Pass explicit paths when running scripts stored elsewhere. An internet connection
+is needed for downloads; this is a locally installed distribution, not a bundled
+offline Python binary archive.
+
 ## What gets installed
 
 Each repository gets its own Python environment. Bootstrap installs Pixi 0.81.0
@@ -68,7 +115,7 @@ inside `.tools/` without changing system Python or your shell profile. Environme
 live in `.pixi/` and downloaded packages in `.cache/`. These directories are ignored
 by Git. Activation exposes this project's Pixi in the current terminal only.
 
-The installer adds the bootstrap, cosmos, update, and activation scripts, plus
+The installer adds the install, bootstrap, cosmos, update, and activation scripts, plus
 `pixi.toml`, `PYTHON-ENVIRONMENT.md`, `COSMOS-TOOLS.md`, and `.cosmos-python.json`.
 The workspace name comes from the target directory name. It appends missing ignore
 rules while preserving existing README and package metadata.
@@ -153,7 +200,7 @@ New installations record the template version and helper-file checksums in
 `.cosmos-python.json`. Keep that file under version control with the scripts.
 Content checksums detect changes even if a release number was not bumped.
 
-The updater manages bootstrap.sh/.ps1, cosmos.sh/.ps1, update.sh/.ps1,
+The updater manages install.sh/.ps1, bootstrap.sh/.ps1, cosmos.sh/.ps1, update.sh/.ps1,
 activate.sh/.ps1, and COSMOS-TOOLS.md. Project notes in PYTHON-ENVIRONMENT.md, README,
 Python/library requirements, tasks, platforms, lockfile, and ignore rules are
 preserved. Generic manifest defaults are not copied into an existing project.
@@ -229,16 +276,21 @@ floating-point results. Research workflows may also need recorded data versions,
 random seeds, external software, drivers, and hardware details.
 
 Mac bootstrap, installation, locked execution, dependency changes, and stale-lock
-rejection have been verified. The 15 installer/updater checks passed, including
+rejection have been verified. The 17 installer/updater checks passed, including
 conflicts, preservation, adoption, tool-version migration, and rollback. Mac launcher
-workflows with spaces in paths were verified. Windows scripts have been reviewed
+workflows with spaces in paths were verified. Fresh standalone Python 3.11
+installation, execution of an external script, repeat installation, and a separate
+Python 3.12 project were verified on 7 October 2026. Standalone customizations are
+tested not to leak into generated projects, and version 1.1 installations can
+receive the new installers through the updater. Windows scripts have been reviewed
 but not executed on Windows; Intel Mac and Linux runtime checks remain pending.
 
 ## Maintaining the starter
 
-Keep the generic environment Python-only. When changing the Pixi release, update
-`VERSION` in cosmos.sh, `$Version` in cosmos.ps1, and `requires-pixi` in pixi.toml
-together. Bootstrap, update, and validate the resulting lockfile. Increment
+Keep the reusable template in `templates/pixi.toml` Python-only; changes to the
+standalone root manifest are separate from that template. When changing the Pixi release, update
+`VERSION` in cosmos.sh, `$Version` in cosmos.ps1, and `requires-pixi` in both root and template pixi.toml files
+together. Regenerate both lockfiles for any changed requirements. Bootstrap, update, and validate the resulting lockfile. Increment
 `template-version.txt` for template releases, preserve metadata compatibility, and
 follow [AGENTS.md](AGENTS.md) when changing the installer or updater.
 

@@ -1,10 +1,14 @@
 # Agent instructions: set up COSMOS Python in another repository
 
-This directory contains a reusable Pixi starter and a repository installer.
+This directory provides both a standalone Python distribution and a reusable
+project environment installer. For standalone use, run install.sh / install.ps1
+in this clone, activate, and use `pixi run --locked python`. A target repository
+is needed only when the user wants to set up a separate project environment.
 When asked to set it up in another repository, complete dependency discovery,
 installation, and validation; copying the Python-only starter is not completion.
 Read this README and the target's applicable agent instructions before editing.
-Use the target path provided by the user. If none was supplied, ask for it.
+For a separate project, use the target path provided by the user; ask if missing.
+Do not ask for a target when the user requests standalone installation.
 Do not assume the target needs probabilistic-segmentation's dependencies.
 
 ## Scope and existing work
@@ -135,10 +139,13 @@ remote publication happened. The default is local changes only.
 
 ## Maintaining cosmos-python itself
 
-Keep the generic starter Python-only. Project-specific packages belong in the
-target. Keep Mac/Linux and Windows launchers aligned, preserve overwrite protection,
+Keep the reusable template (`templates/pixi.toml` and `templates/pixi.lock`)
+Python-only. Root manifest/lockfile customization belongs to the standalone
+environment and must not leak into generated projects. Project-specific packages
+belong in the target. The tooling runtime in cosmos-python must stay Python 3.11+. Keep Mac/Linux and Windows launchers aligned, preserve overwrite protection,
 and update README and templates/PYTHON-ENVIRONMENT.md for workflow changes.
-The bootstrap Pixi version and manifest requires-pixi constraint must agree.
+The bootstrap Pixi version and both root/template requires-pixi constraints must
+agree. Update the corresponding lockfile whenever either manifest changes.
 Run relevant checks after installer changes:
 
 ```sh

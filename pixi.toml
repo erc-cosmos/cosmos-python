@@ -7,9 +7,9 @@ platforms = ["osx-arm64", "osx-64", "win-64", "linux-64"]
 requires-pixi = "==0.81.0"
 
 [dependencies]
-# Python 3.11 is a starting point, not a claim that every COSMOS repo supports it.
+# Standalone Python; generated projects use the separate templates/pixi.toml.
 # The lockfile pins the exact patch version and all indirect dependencies.
-python = "3.11.*"
+python = "3.14.*"
 # Examples: remove the # and choose versions appropriate to your project.
 # numpy = "==1.26.4"
 # pandas = "==2.2.3"

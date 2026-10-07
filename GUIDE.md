@@ -77,7 +77,9 @@ Run each project's tests and review/commit the resulting helper and metadata cha
 ## Standalone and project environments
 
 The root `pixi.toml` and `pixi.lock` define the standalone distribution installed
-inside your cosmos-python clone. `install.sh` / `install.ps1` bootstraps Pixi and
+inside your cosmos-python clone. The standalone default is Python 3.14; the
+reusable project template stays on Python 3.11 unless a version is selected.
+`install.sh` / `install.ps1` bootstraps Pixi and
 installs that saved environment in one command; no existing Python is required.
 It can be used interactively or to execute scripts outside a project. Activation
 makes Pixi available; use `pixi run --locked python`, not an unrelated system Python.
@@ -303,3 +305,7 @@ bash cosmos.sh run python -m unittest discover -s tests -v
 Upstream references: [Pixi installation](https://pixi.sh/latest/installation/),
 [locked installation](https://pixi.sh/latest/reference/cli/pixi/install/), and
 [dependency updates](https://pixi.sh/latest/reference/cli/pixi/update/).
+
+Standalone Python was subsequently upgraded to 3.14.8 on 7 October 2026.
+Locked installation and all 17 installer/updater tests passed on the development
+Mac under Python 3.14. The separate project template remains on Python 3.11.

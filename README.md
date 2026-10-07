@@ -11,7 +11,7 @@ cd ~/github.com/erc-cosmos/cosmos-python
 Follow either setup option below. These commands are for Mac/Linux; see the
 [Windows instructions](GUIDE.md#windows-instructions) for PowerShell.
 
-## Option 1: install Python for standalone use
+## Option 1: install Python 3.14 for standalone use
 
 From the cosmos-python directory:
 

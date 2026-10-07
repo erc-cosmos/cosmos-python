@@ -310,3 +310,47 @@ Standalone Python was subsequently upgraded to 3.14.8 on 7 October 2026.
 Locked installation and all 17 installer/updater tests passed on the development
 Mac under Python 3.14. The separate project template now also defaults to Python 3.14. Existing project
 environments keep their own Python version.
+
+
+## Standalone scientific package versions
+
+The standalone manifest uses Python 3.14 and these dependency ranges:
+
+| Package | Range |
+| --- | --- |
+| NumPy | `>=2.5.3,<2.6` |
+| pandas | `>=3.0.6,<3.1` |
+| Numba | `>=0.68.0,<0.69` |
+| scikit-learn | `>=1.9.1,<2` |
+| PyTorch | `>=2.13.0,<3` |
+| SciPy | `>=1.18.1,<2` |
+
+NumPy and pandas permit patch updates. Numba also stays within one minor
+release because it is pre-1.0. The other packages permit minor and patch
+updates within their major version. Minimum versions retain the selected
+compatibility baseline. Commit `pixi.lock` alongside the manifest: locked installs
+use its exact versions, rather than choosing new versions from these ranges.
+
+All six scientific packages come from conda-forge. PyTorch uses the `pytorch`
+package with `cpu*` builds, providing a common CPU baseline on Intel and Apple
+Silicon Macs. The full stack supports macOS 12+ on both architectures, Windows
+x86-64, and Linux x86-64 with glibc 2.28+. Official PyPI PyTorch wheels no longer
+support Intel Macs, but conda-forge builds do. GPU configurations require
+separate setup and validation.
+The Python-only template retains its existing four platforms, and generated
+projects choose their own dependencies.
+
+Run `bash cosmos.sh run python tests/scientific_smoke.py` after updating the
+standalone lockfile. It checks SciPy linear algebra and optimization, Numba
+compilation, pandas rolling calculations with Numba, a pandas/scikit-learn
+regression pipeline, and PyTorch/NumPy shared memory and gradients. These are
+CPU checks; GPU drivers and accelerator execution need separate validation.
+Existing scripts also need checking for pandas 3 string and copy-on-write
+behaviour changes.
+
+Validation on 7 October 2026: locked installation, all six scientific smoke
+checks, and all 17 installer/update tests passed on Apple Silicon. Resolved
+versions: NumPy 2.5.3, pandas 3.0.6, Numba 0.68.0, SciPy 1.18.1,
+scikit-learn 1.9.1, and PyTorch 2.13.0. The lockfile also resolves Intel Mac,
+Windows, and Linux environments; runtime testing on those systems and GPU
+testing remain outstanding.

@@ -3,16 +3,27 @@
 name = "cosmos-python"
 version = "0.1.0"
 channels = ["conda-forge"]
-platforms = ["osx-arm64", "osx-64", "win-64", "linux-64"]
+platforms = [
+  { name = "macos-12-arm64", platform = "osx-arm64", macos = "12.0" },
+  { name = "macos-12-intel", platform = "osx-64", macos = "12.0" },
+  "win-64",
+  { name = "linux-glibc-228", platform = "linux-64", glibc = "2.28" },
+]
 requires-pixi = "==0.81.0"
 
 [dependencies]
 # Standalone Python; generated projects use the separate templates/pixi.toml.
 # The lockfile pins the exact patch version and all indirect dependencies.
 python = "3.14.*"
-# Examples: remove the # and choose versions appropriate to your project.
-# numpy = "==1.26.4"
-# pandas = "==2.2.3"
+# Keep the tested minimum versions; pixi.lock records exact installations.
+numpy = ">=2.5.3,<2.6"
+pandas = ">=3.0.6,<3.1"
+# Numba is pre-1.0: keep its minor version fixed.
+numba = ">=0.68.0,<0.69"
+scikit-learn = ">=1.9.1,<2"
+scipy = ">=1.18.1,<2"
+# CPU builds provide a common baseline across Intel and Apple Silicon Macs.
+pytorch = { version = ">=2.13.0,<3", build = "cpu*" }
 
 [pypi-dependencies]
 # Put packages unavailable on conda-forge here. Do not list a package in both sections.

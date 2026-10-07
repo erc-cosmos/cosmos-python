@@ -13,6 +13,10 @@ Follow either setup option below. These commands are for Mac/Linux; see the
 
 ## Option 1: install Python 3.14 for standalone use
 
+Use an Intel or Apple Silicon Mac with macOS 12+, Windows x86-64, or Linux
+x86-64 with glibc 2.28+. The standalone environment includes NumPy, pandas,
+Numba, SciPy, scikit-learn, and PyTorch with a CPU baseline.
+
 From the cosmos-python directory:
 
 ```sh
@@ -27,7 +31,11 @@ To run a script instead of opening Python interactively:
 pixi run --locked python /path/to/your_script.py
 ```
 
-Repeat `source ./activate.sh` in each new terminal.
+Repeat `source ./activate.sh` in each new terminal. To check the installed libraries:
+
+```sh
+pixi run --locked python tests/scientific_smoke.py
+```
 
 ## Option 2: install Python for another repository
 

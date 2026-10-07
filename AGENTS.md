@@ -141,7 +141,9 @@ remote publication happened. The default is local changes only.
 
 Keep the reusable template (`templates/pixi.toml` and `templates/pixi.lock`)
 Python-only. Root manifest/lockfile customization belongs to the standalone
-environment and must not leak into generated projects. Project-specific packages
+environment and must not leak into default generated projects. The explicit
+`--distribution` / `-Distribution` option copies the full standalone manifest and
+lockfile when the user requests that baseline. Project-specific packages
 belong in the target. The tooling runtime in cosmos-python must stay Python 3.11+. Keep Mac/Linux and Windows launchers aligned, preserve overwrite protection,
 and update README and templates/PYTHON-ENVIRONMENT.md for workflow changes.
 The bootstrap Pixi version and both root/template requires-pixi constraints must

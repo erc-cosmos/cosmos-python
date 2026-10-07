@@ -49,6 +49,10 @@ pixi run --locked python your_script.py
 ```
 
 Replace the example paths with your own. New projects default to Python 3.14.
+Add `--distribution` to start with the complete COSMOS scientific distribution
+and its saved versions instead of Python only (Windows: `-Distribution`).
+Do not combine it with an alternative Python version.
+
 Add `--python 3.11` to the setup command if a project needs an older version. Then add its packages as described below.
 
 For a project already configured by a colleague, run `bash install.sh` inside

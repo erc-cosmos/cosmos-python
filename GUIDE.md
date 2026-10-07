@@ -354,3 +354,31 @@ versions: NumPy 2.5.3, pandas 3.0.6, Numba 0.68.0, SciPy 1.18.1,
 scikit-learn 1.9.1, and PyTorch 2.13.0. The lockfile also resolves Intel Mac,
 Windows, and Linux environments; runtime testing on those systems and GPU
 testing remain outstanding.
+
+## Create a project with the full distribution
+
+The undergraduate template is [cosmos-python-template](https://github.com/erc-cosmos/cosmos-python-template).
+Choose **Use this template → Create a new repository** to make an independent
+project with example source, tests, documentation, and GitHub checks. Install
+from that project's committed lockfile; no separate cosmos-python clone is needed.
+
+To put the full distribution into another existing, unconfigured repository:
+
+```sh
+bash setup-repo.sh /path/to/project --distribution --dry-run
+bash setup-repo.sh /path/to/project --distribution
+```
+
+Windows: `./setup-repo.ps1 -Repository C:\path\project -Distribution -DryRun`,
+then repeat without `-DryRun`. Use `--files-only` / `-FilesOnly` to customise
+requirements before installation. This mode copies the root manifest and lockfile
+from the trusted checkout exactly (apart from the workspace name); use an
+unmodified, reviewed checkout to obtain the official baseline. It rejects an
+alternative Python version. The default setup remains Python-only.
+
+`.cosmos-distribution.json` records baseline dependencies and SHA-256 hashes.
+It remains project-owned, as do extra requirements and the lockfile. Helper
+updates never replace these. To adopt newer distribution requirements, compare
+the new standalone manifest against the recorded baseline, merge deliberately,
+run update and project tests, and commit the reviewed manifest and lockfile.
+This is a manual dependency migration; the helper updater only updates tools.

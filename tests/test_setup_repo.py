@@ -81,6 +81,26 @@ class SetupTests(unittest.TestCase):
         self.assertIn('install.sh', files)
         self.assertIn('install.ps1', files)
 
+    def test_distribution_copies_full_snapshot(self):
+        import json
+        import tomllib
+        files, before, suffix = setup.plan(self.target, '3.14', distribution=True)
+        self.assertEqual(files['pixi.lock'], (SOURCE / 'pixi.lock').read_bytes())
+        manifest = tomllib.loads(files['pixi.toml'].decode())
+        source = tomllib.loads((SOURCE / 'pixi.toml').read_text())
+        self.assertEqual(manifest['dependencies'], source['dependencies'])
+        self.assertEqual(manifest['workspace']['platforms'], source['workspace']['platforms'])
+        self.assertEqual(json.loads(files['.cosmos-distribution.json'])['dependencies'], source['dependencies'])
+        self.assertEqual(list(self.target.iterdir()), [])
+        setup.install_files(self.target, files, before, suffix)
+        with self.assertRaises(ValueError):
+            setup.plan(self.target, '3.14', distribution=True)
+
+    def test_distribution_rejects_python_override(self):
+        with self.assertRaisesRegex(ValueError, 'distribution Python'):
+            setup.plan(self.target, '3.11', distribution=True)
+        self.assertEqual(list(self.target.iterdir()), [])
+
     def test_missing_target_rejected(self):
         with self.assertRaises(ValueError):
             setup.plan(self.target / 'missing', '3.14')

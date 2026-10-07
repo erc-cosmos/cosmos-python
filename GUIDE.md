@@ -8,11 +8,24 @@ Windows, advanced options, how updates work, and troubleshooting.
 Use PowerShell and adjust the paths below to your machine. An internet connection
 is required for initial downloads; you do not need Python installed beforehand.
 
-### Get the tools and set up a project
+### Install standalone Python
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\github.com\erc-cosmos" | Out-Null
 git clone https://github.com/erc-cosmos/cosmos-python.git "$HOME\github.com\erc-cosmos\cosmos-python"
+cd "$HOME\github.com\erc-cosmos\cosmos-python"
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+. .\activate.ps1
+pixi run --locked python --version
+pixi run --locked python
+```
+
+To run an external script, use `pixi run --locked python C:\path\your_script.py`.
+Add packages with `cosmos.ps1 add` as below, running from the cosmos-python directory.
+
+### Install Python for a project
+
+```powershell
 powershell -ExecutionPolicy Bypass -File "$HOME\github.com\erc-cosmos\cosmos-python\setup-repo.ps1" -Repository "C:\work\my-repo"
 ```
 
@@ -61,6 +74,42 @@ git -C "$HOME\github.com\erc-cosmos\cosmos-python" pull --ff-only
 For installations without `.cosmos-python.json`, add `-Adopt` to both commands.
 Run each project's tests and review/commit the resulting helper and metadata changes.
 
+## Standalone and project environments
+
+The root `pixi.toml` and `pixi.lock` define the standalone distribution installed
+inside your cosmos-python clone. The standalone default is Python 3.14; the
+reusable project template also defaults to Python 3.14 unless a version is selected.
+`install.sh` / `install.ps1` bootstraps Pixi and
+installs that saved environment in one command; no existing Python is required.
+It can be used interactively or to execute scripts outside a project. Activation
+makes Pixi available; use `pixi run --locked python`, not an unrelated system Python.
+For an editor, select `.pixi/envs/default/bin/python` on Mac/Linux or
+`.pixi\envs\default\python.exe` on Windows. On Windows, prefer the Pixi wrapper for
+execution so environment variables and native-library paths are activated correctly.
+
+The project installer uses the separate Python-only template at
+`templates/pixi.toml` and `templates/pixi.lock`. Adding personal packages to the
+root standalone environment does not add them to future project environments.
+Each project can choose its own Python version and packages; it does not depend
+on the standalone environment at runtime after installation.
+
+The installer/updater launchers use the standalone Python to run their tooling,
+which requires Python 3.11 or later. Keep that requirement if using this clone to
+manage projects, even when a target itself needs Python 3.9 or 3.10. If you change
+root dependencies, run update before using the launchers again.
+
+`install` always uses the saved lockfile and refuses inconsistent requirements;
+use `update.sh` / `update.ps1` intentionally after editing requirements. For an
+unchanged standalone checkout, pull and rerun install to apply published updates.
+If you customized its root manifest/lockfile, preserve and reconcile those Git
+changes before pulling; the installer does not overwrite them. Repository updater
+commands target other repositories, not the cosmos-python clone itself.
+
+A script's relative data paths are resolved in the Pixi workspace directory.
+Pass explicit paths when running scripts stored elsewhere. An internet connection
+is needed for downloads; this is a locally installed distribution, not a bundled
+offline Python binary archive.
+
 ## What gets installed
 
 Each repository gets its own Python environment. Bootstrap installs Pixi 0.81.0
@@ -68,12 +117,12 @@ inside `.tools/` without changing system Python or your shell profile. Environme
 live in `.pixi/` and downloaded packages in `.cache/`. These directories are ignored
 by Git. Activation exposes this project's Pixi in the current terminal only.
 
-The installer adds the bootstrap, cosmos, update, and activation scripts, plus
+The installer adds the install, bootstrap, cosmos, update, and activation scripts, plus
 `pixi.toml`, `PYTHON-ENVIRONMENT.md`, `COSMOS-TOOLS.md`, and `.cosmos-python.json`.
 The workspace name comes from the target directory name. It appends missing ignore
 rules while preserving existing README and package metadata.
 
-For default Python 3.11, it copies the starter lockfile; another Python minor
+For default Python 3.14, it copies the starter lockfile; another Python minor
 version gets a new lockfile when installation runs. Existing requirements files
 are not imported automatically. Project-specific packages must be added and tested.
 
@@ -153,7 +202,7 @@ New installations record the template version and helper-file checksums in
 `.cosmos-python.json`. Keep that file under version control with the scripts.
 Content checksums detect changes even if a release number was not bumped.
 
-The updater manages bootstrap.sh/.ps1, cosmos.sh/.ps1, update.sh/.ps1,
+The updater manages install.sh/.ps1, bootstrap.sh/.ps1, cosmos.sh/.ps1, update.sh/.ps1,
 activate.sh/.ps1, and COSMOS-TOOLS.md. Project notes in PYTHON-ENVIRONMENT.md, README,
 Python/library requirements, tasks, platforms, lockfile, and ignore rules are
 preserved. Generic manifest defaults are not copied into an existing project.
@@ -229,16 +278,21 @@ floating-point results. Research workflows may also need recorded data versions,
 random seeds, external software, drivers, and hardware details.
 
 Mac bootstrap, installation, locked execution, dependency changes, and stale-lock
-rejection have been verified. The 15 installer/updater checks passed, including
+rejection have been verified. The 17 installer/updater checks passed, including
 conflicts, preservation, adoption, tool-version migration, and rollback. Mac launcher
-workflows with spaces in paths were verified. Windows scripts have been reviewed
+workflows with spaces in paths were verified. Fresh standalone Python 3.11
+installation, execution of an external script, repeat installation, and a separate
+Python 3.12 project were verified on 7 October 2026. Standalone customizations are
+tested not to leak into generated projects, and version 1.1 installations can
+receive the new installers through the updater. Windows scripts have been reviewed
 but not executed on Windows; Intel Mac and Linux runtime checks remain pending.
 
 ## Maintaining the starter
 
-Keep the generic environment Python-only. When changing the Pixi release, update
-`VERSION` in cosmos.sh, `$Version` in cosmos.ps1, and `requires-pixi` in pixi.toml
-together. Bootstrap, update, and validate the resulting lockfile. Increment
+Keep the reusable template in `templates/pixi.toml` Python-only; changes to the
+standalone root manifest are separate from that template. When changing the Pixi release, update
+`VERSION` in cosmos.sh, `$Version` in cosmos.ps1, and `requires-pixi` in both root and template pixi.toml files
+together. Regenerate both lockfiles for any changed requirements. Bootstrap, update, and validate the resulting lockfile. Increment
 `template-version.txt` for template releases, preserve metadata compatibility, and
 follow [AGENTS.md](AGENTS.md) when changing the installer or updater.
 
@@ -251,3 +305,52 @@ bash cosmos.sh run python -m unittest discover -s tests -v
 Upstream references: [Pixi installation](https://pixi.sh/latest/installation/),
 [locked installation](https://pixi.sh/latest/reference/cli/pixi/install/), and
 [dependency updates](https://pixi.sh/latest/reference/cli/pixi/update/).
+
+Standalone Python was subsequently upgraded to 3.14.8 on 7 October 2026.
+Locked installation and all 17 installer/updater tests passed on the development
+Mac under Python 3.14. The separate project template now also defaults to Python 3.14. Existing project
+environments keep their own Python version.
+
+
+## Standalone scientific package versions
+
+The standalone manifest uses Python 3.14 and these dependency ranges:
+
+| Package | Range |
+| --- | --- |
+| NumPy | `>=2.5.3,<2.6` |
+| pandas | `>=3.0.6,<3.1` |
+| Numba | `>=0.68.0,<0.69` |
+| scikit-learn | `>=1.9.1,<2` |
+| PyTorch | `>=2.13.0,<3` |
+| SciPy | `>=1.18.1,<2` |
+
+NumPy and pandas permit patch updates. Numba also stays within one minor
+release because it is pre-1.0. The other packages permit minor and patch
+updates within their major version. Minimum versions retain the selected
+compatibility baseline. Commit `pixi.lock` alongside the manifest: locked installs
+use its exact versions, rather than choosing new versions from these ranges.
+
+All six scientific packages come from conda-forge. PyTorch uses the `pytorch`
+package with `cpu*` builds, providing a common CPU baseline on Intel and Apple
+Silicon Macs. The full stack supports macOS 12+ on both architectures, Windows
+x86-64, and Linux x86-64 with glibc 2.28+. Official PyPI PyTorch wheels no longer
+support Intel Macs, but conda-forge builds do. GPU configurations require
+separate setup and validation.
+The Python-only template retains its existing four platforms, and generated
+projects choose their own dependencies.
+
+Run `bash cosmos.sh run python tests/scientific_smoke.py` after updating the
+standalone lockfile. It checks SciPy linear algebra and optimization, Numba
+compilation, pandas rolling calculations with Numba, a pandas/scikit-learn
+regression pipeline, and PyTorch/NumPy shared memory and gradients. These are
+CPU checks; GPU drivers and accelerator execution need separate validation.
+Existing scripts also need checking for pandas 3 string and copy-on-write
+behaviour changes.
+
+Validation on 7 October 2026: locked installation, all six scientific smoke
+checks, and all 17 installer/update tests passed on Apple Silicon. Resolved
+versions: NumPy 2.5.3, pandas 3.0.6, Numba 0.68.0, SciPy 1.18.1,
+scikit-learn 1.9.1, and PyTorch 2.13.0. The lockfile also resolves Intel Mac,
+Windows, and Linux environments; runtime testing on those systems and GPU
+testing remain outstanding.

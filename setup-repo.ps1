@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true, Position=0)][string]$Repository,
-    [string]$PythonVersion = '3.11',
+    [string]$PythonVersion = '3.14',
     [switch]$DryRun,
     [switch]$FilesOnly
 )

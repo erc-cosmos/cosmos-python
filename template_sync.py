@@ -11,7 +11,9 @@ import uuid
 STATE = '.cosmos-python.json'
 HELPERS = ('bootstrap.sh', 'bootstrap.ps1', 'cosmos.sh', 'cosmos.ps1',
            'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1')
-MANAGED = (*HELPERS, 'COSMOS-TOOLS.md')
+# Keep the eight original helpers as the legacy adoption baseline.
+INSTALLERS = ('install.sh', 'install.ps1')
+MANAGED = (*HELPERS, *INSTALLERS, 'COSMOS-TOOLS.md')
 
 
 def digest(data):
@@ -27,10 +29,10 @@ def read(path):
 
 
 def snapshot(source):
-    files = {name: (source / name).read_bytes() for name in HELPERS}
+    files = {name: (source / name).read_bytes() for name in (*HELPERS, *INSTALLERS)}
     files['COSMOS-TOOLS.md'] = (source / 'templates/COSMOS-TOOLS.md').read_bytes()
     version = (source / 'template-version.txt').read_text().strip()
-    constraint = tomllib.loads((source / 'pixi.toml').read_text())['workspace']['requires-pixi']
+    constraint = tomllib.loads((source / 'templates/pixi.toml').read_text())['workspace']['requires-pixi']
     return files, version, constraint
 
 

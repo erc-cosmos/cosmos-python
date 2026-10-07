@@ -1,7 +1,8 @@
 # Python environment
 
 This repository uses Pixi, with its own Python and packages. No system Python is
-needed. The starter initially includes only Python: a maintainer must add the
+needed. New projects default to Python 3.14 unless another version is selected.
+The starter initially includes only Python: a maintainer must add the
 project's dependencies and validate its code before distributing it as ready to use.
 
 ## First setup (also for collaborators)
@@ -9,8 +10,7 @@ project's dependencies and validate its code before distributing it as ready to 
 Mac/Linux, from this repository directory:
 
 ```sh
-bash bootstrap.sh
-bash cosmos.sh setup
+bash install.sh
 source ./activate.sh
 pixi run python --version
 pixi run python foo.py
@@ -19,8 +19,7 @@ pixi run python foo.py
 Windows PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\bootstrap.ps1
-powershell -ExecutionPolicy Bypass -File .\cosmos.ps1 setup
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 . .\activate.ps1
 pixi run python --version
 pixi run python foo.py
@@ -40,6 +39,12 @@ use locked mode. `pixi run` alone can update a stale lockfile.
 If the installer used `--files-only`, first run bootstrap and update, as below,
 to resolve and install the environment before using `setup`. A custom Python
 version does not have a lockfile until this initial update succeeds.
+
+`install.sh` / `install.ps1` installs Pixi and this repository's saved Python
+environment in one command. It does not require a separate cosmos-python clone.
+Each project's Python and packages are independent of the standalone distribution
+in cosmos-python. For older installations without the install script, run
+`bootstrap.sh` followed by `cosmos.sh setup` (or their PowerShell equivalents).
 
 ## Add requirements and update
 

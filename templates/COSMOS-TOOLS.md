@@ -1,6 +1,6 @@
 # Updating the COSMOS setup tools
 
-This file and the bootstrap, cosmos, update, and activate scripts are managed by
+This file and the install, bootstrap, cosmos, update, and activate scripts are managed by
 cosmos-python. `.cosmos-python.json` records their installed template version and
 checksums. Commit that file with the scripts. Keep project notes in
 PYTHON-ENVIRONMENT.md, which is not overwritten by template updates.

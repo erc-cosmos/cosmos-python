@@ -13,7 +13,7 @@ from template_sync import STATE, snapshot, state_bytes
 SOURCE = Path(__file__).resolve().parent
 COPY_FILES = (
     'bootstrap.sh', 'bootstrap.ps1', 'cosmos.sh', 'cosmos.ps1',
-    'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1',
+    'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1', 'install.sh', 'install.ps1',
 )
 IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/')
 
@@ -45,13 +45,13 @@ def plan(target, python_version):
         suffix = prefix + ('\n# COSMOS Python local files\n' + '\n'.join(missing) + '\n').encode()
     files = {name: (SOURCE / name).read_bytes() for name in COPY_FILES}
     name = re.sub(r'[^a-z0-9-]+', '-', target.name.lower()).strip('-') or 'cosmos-project'
-    manifest = (SOURCE / 'pixi.toml').read_text(encoding='utf-8')
+    manifest = (SOURCE / 'templates/pixi.toml').read_text(encoding='utf-8')
     manifest = manifest.replace('name = "cosmos-python"', f'name = "{name}"', 1)
-    manifest = manifest.replace('python = "3.11.*"', f'python = "{python_version}.*"', 1)
+    manifest = manifest.replace('python = "3.14.*"', f'python = "{python_version}.*"', 1)
     files['pixi.toml'] = manifest.encode()
     # Only carry over the generic lock if its Python requirement is unchanged.
-    if python_version == '3.11':
-        files['pixi.lock'] = (SOURCE / 'pixi.lock').read_bytes()
+    if python_version == '3.14':
+        files['pixi.lock'] = (SOURCE / 'templates/pixi.lock').read_bytes()
     files['PYTHON-ENVIRONMENT.md'] = (SOURCE / 'templates' / 'PYTHON-ENVIRONMENT.md').read_bytes()
     managed, version, constraint = snapshot(SOURCE)
     files['COSMOS-TOOLS.md'] = managed['COSMOS-TOOLS.md']
@@ -103,8 +103,8 @@ def install_environment(target):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('repository', type=Path, help='Existing local repository directory')
-    parser.add_argument('--python', default='3.11', dest='python_version', metavar='3.MINOR',
-                        help='Python minor version, e.g. 3.11 or 3.12 (default: 3.11)')
+    parser.add_argument('--python', default='3.14', dest='python_version', metavar='3.MINOR',
+                        help='Python minor version, e.g. 3.11 or 3.12 (default: 3.14)')
     parser.add_argument('--dry-run', action='store_true', help='Preview without changing the target')
     parser.add_argument('--files-only', action='store_true', help='Write files without downloading/installing the target environment')
     args = parser.parse_args()

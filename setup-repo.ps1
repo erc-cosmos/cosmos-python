@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory=$true, Position=0)][string]$Repository,
     [string]$PythonVersion = '3.14',
+    [switch]$Distribution,
     [switch]$DryRun,
     [switch]$FilesOnly
 )
@@ -13,6 +14,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & $Shell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'cosmos.ps1') setup
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $Options = @($Target, '--python', $PythonVersion)
+if ($Distribution) { $Options += '--distribution' }
 if ($DryRun) { $Options += '--dry-run' }
 if ($FilesOnly) { $Options += '--files-only' }
 & $Shell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'cosmos.ps1') run python (Join-Path $PSScriptRoot 'setup_repo.py') @Options

@@ -15,7 +15,8 @@ Follow either setup option below. These commands are for Mac/Linux; see the
 
 Use an Intel or Apple Silicon Mac with macOS 12+, Windows x86-64, or Linux
 x86-64 with glibc 2.28+. The standalone environment includes NumPy, pandas,
-Numba, SciPy, scikit-learn, and PyTorch with a CPU baseline.
+Numba, SciPy, scikit-learn, and PyTorch with a CPU baseline, plus matplotlib,
+IPython, pytest, soundfile, openpyxl, and pretty-midi for audio and MIDI work.
 
 From the cosmos-python directory:
 
@@ -36,6 +37,10 @@ Repeat `source ./activate.sh` in each new terminal. To check the installed libra
 ```sh
 pixi run --locked python tests/scientific_smoke.py
 ```
+
+The standalone manifest also defines tasks: `bash cosmos.sh run test` runs pytest,
+`bash cosmos.sh run smoke` runs the checks above, and `bash cosmos.sh run test-all`
+runs both. Windows: `./cosmos.ps1 run test-all`.
 
 ## Option 2: install Python for another repository
 
@@ -75,7 +80,8 @@ To change or remove requirements manually, edit `pixi.toml` and run:
 bash update.sh
 ```
 
-For shared projects, run the tests and commit `pixi.toml` and `pixi.lock` together.
+For shared projects, run `bash cosmos.sh run test-all` and commit `pixi.toml` and
+`pixi.lock` together.
 
 ## Get updates
 

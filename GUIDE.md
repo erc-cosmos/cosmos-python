@@ -161,6 +161,27 @@ Use the actual package name. Keep published package metadata in `pyproject.toml`
 avoid separately maintaining duplicate dependency lists. A Python-version line
 in an older requirements.txt belongs in Pixi's Python requirement, not on PyPI.
 
+Some packages publish no wheels and must compile against an already installed
+library, for example `torch-scatter` and `torch-sparse` against PyTorch. Keep them
+in `[pypi-dependencies]`, provide the build tools in the environment (`pip`,
+`setuptools`, `wheel` and a C/C++ compiler), and list them so the build sees that
+environment instead of an isolated one:
+
+```toml
+[pypi-options]
+no-build-isolation = ["torch-scatter", "torch-sparse"]
+```
+
+Pixi then builds them during installation. Expect a few minutes on the first
+install, and a working compiler on every machine. Check that such a package
+actually computes, not only that it imports.
+
+The standalone manifest also defines `test`, `smoke`, and `test-all` tasks and keeps
+generated caches inside `.cache/` through `[activation.env]`, so plotting caches stay
+in the Git-ignored project directory instead of your home directory. Run a task with
+`pixi run --locked test` after activation, or `bash cosmos.sh run test`. Generated
+projects keep their own tasks; the starter template still ships Python only.
+
 `update.sh` reconciles edited requirements, preserving locked versions where
 possible. To deliberately refresh all dependencies within the allowed ranges:
 
@@ -278,7 +299,7 @@ floating-point results. Research workflows may also need recorded data versions,
 random seeds, external software, drivers, and hardware details.
 
 Mac bootstrap, installation, locked execution, dependency changes, and stale-lock
-rejection have been verified. The 17 installer/updater checks passed, including
+rejection have been verified. The 19 installer/updater checks passed, including
 conflicts, preservation, adoption, tool-version migration, and rollback. Mac launcher
 workflows with spaces in paths were verified. Fresh standalone Python 3.11
 installation, execution of an external script, repeat installation, and a separate
@@ -312,7 +333,7 @@ Mac under Python 3.14. The separate project template now also defaults to Python
 environments keep their own Python version.
 
 
-## Standalone scientific package versions
+## Standalone package versions
 
 The standalone manifest uses Python 3.14 and these dependency ranges:
 
@@ -324,26 +345,42 @@ The standalone manifest uses Python 3.14 and these dependency ranges:
 | scikit-learn | `>=1.9.1,<2` |
 | PyTorch | `>=2.13.0,<3` |
 | SciPy | `>=1.18.1,<2` |
+| matplotlib | `>=3.11.2,<4` |
+| IPython | `>=9.17.1,<10` |
+| pytest | `>=8,<10` |
+| pytest-xdist | `>=3.8,<4` |
+| setuptools | `>=80,<82` |
+| pysoundfile | `>=0.14,<0.15` |
+| tqdm | `>=4.70,<5` |
+| PyYAML | `>=6.0.3,<7` |
+| openpyxl | `>=3.1.5,<4` |
+| pretty-midi (PyPI) | `==0.2.11.post0` |
 
 NumPy and pandas permit patch updates. Numba also stays within one minor
 release because it is pre-1.0. The other packages permit minor and patch
 updates within their major version. Minimum versions retain the selected
-compatibility baseline. Commit `pixi.lock` alongside the manifest: locked installs
-use its exact versions, rather than choosing new versions from these ranges.
+compatibility baseline, and pretty-midi is pinned exactly because it is a PyPI
+package with no maintained conda-forge release. Commit `pixi.lock` alongside the
+manifest: locked installs use its exact versions, rather than choosing new
+versions from these ranges.
 
-All six scientific packages come from conda-forge. PyTorch uses the `pytorch`
+Every package except pretty-midi comes from conda-forge. Two conda names differ
+from their import names: `pysoundfile` imports as `soundfile` and `pyyaml` imports
+as `yaml`. Conda-forge's only `pretty_midi` release, 0.2.9, fails under NumPy 2 and
+Python 3.14, so pretty-midi is installed from PyPI. PyTorch uses the `pytorch`
 package with `cpu*` builds, providing a common CPU baseline on Intel and Apple
 Silicon Macs. The full stack supports macOS 12+ on both architectures, Windows
 x86-64, and Linux x86-64 with glibc 2.28+. Official PyPI PyTorch wheels no longer
-support Intel Macs, but conda-forge builds do. GPU configurations require
-separate setup and validation.
+support Intel Macs, and recent releases also require macOS 14, but conda-forge
+builds do neither. GPU configurations require separate setup and validation.
 The Python-only template retains its existing four platforms, and generated
 projects choose their own dependencies.
 
-Run `bash cosmos.sh run python tests/scientific_smoke.py` after updating the
-standalone lockfile. It checks SciPy linear algebra and optimization, Numba
-compilation, pandas rolling calculations with Numba, a pandas/scikit-learn
-regression pipeline, and PyTorch/NumPy shared memory and gradients. These are
+Run `bash cosmos.sh run test-all` after updating the standalone lockfile. It runs
+pytest over the installer and updater tests, then the scientific smoke checks,
+which cover SciPy linear algebra and optimization, Numba compilation, pandas
+rolling calculations with Numba, a pandas/scikit-learn regression pipeline, and
+PyTorch/NumPy shared memory and gradients. These are
 CPU checks; GPU drivers and accelerator execution need separate validation.
 Existing scripts also need checking for pandas 3 string and copy-on-write
 behaviour changes.
@@ -354,6 +391,16 @@ versions: NumPy 2.5.3, pandas 3.0.6, Numba 0.68.0, SciPy 1.18.1,
 scikit-learn 1.9.1, and PyTorch 2.13.0. The lockfile also resolves Intel Mac,
 Windows, and Linux environments; runtime testing on those systems and GPU
 testing remain outstanding.
+
+Validation on 15 October 2026: the added plotting, testing, interactive and audio
+packages resolved for all four declared platforms and installed on Apple Silicon,
+where all 19 installer/updater tests and the six scientific smoke checks passed.
+The additions were exercised at runtime by plotting to a file, reading and writing
+WAV and MIDI data, spreadsheet round-trips, and pytest task execution. Resolved
+additions: matplotlib 3.11.2, IPython 9.17.1, pytest 9.1.1, pytest-xdist 3.8.0,
+setuptools 81.0.0, pysoundfile 0.14.0, tqdm 4.70.1, PyYAML 6.0.3, openpyxl 3.1.5
+and pretty-midi 0.2.11.post0. The standalone environment occupies about 1.3 GB.
+Intel Mac, Windows and Linux runtime testing and GPU testing remain outstanding.
 
 ## Create a project with the full distribution
 

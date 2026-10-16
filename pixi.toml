@@ -24,7 +24,33 @@ scikit-learn = ">=1.9.1,<2"
 scipy = ">=1.18.1,<2"
 # CPU builds provide a common baseline across Intel and Apple Silicon Macs.
 pytorch = { version = ">=2.13.0,<3", build = "cpu*" }
+# Plotting and interactive use, required by the existing COSMOS research repos.
+matplotlib = ">=3.11.2,<4"
+ipython = ">=9.17.1,<10"
+# Test runner for pixi run test; xdist adds the pytest -n option.
+pytest = ">=8,<10"
+pytest-xdist = ">=3.8,<4"
+# Provides pkg_resources for older research packages such as pretty_midi.
+setuptools = ">=80,<82"
+# Audio and spreadsheet input/output. pysoundfile imports as soundfile.
+pysoundfile = ">=0.14,<0.15"
+tqdm = ">=4.70,<5"
+pyyaml = ">=6.0.3,<7"
+openpyxl = ">=3.1.5,<4"
 
 [pypi-dependencies]
 # Put packages unavailable on conda-forge here. Do not list a package in both sections.
-# pretty-midi = "==0.2.10"
+# conda-forge only has pretty_midi 0.2.9, which fails with NumPy 2 and Python 3.14.
+pretty-midi = "==0.2.11.post0"
+
+[activation.env]
+# Keep writable caches inside the Git-ignored project cache directory.
+MPLCONFIGDIR = "$PIXI_PROJECT_ROOT/.cache/matplotlib"
+XDG_CACHE_HOME = "$PIXI_PROJECT_ROOT/.cache"
+
+[tasks]
+# Explicit paths: discovery would not collect tests/scientific_smoke.py either.
+test = "pytest tests"
+smoke = "python tests/scientific_smoke.py"
+# depends-on avoids shell operators, which differ between bash and PowerShell.
+test-all = { depends-on = ["test", "smoke"] }

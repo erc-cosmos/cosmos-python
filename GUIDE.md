@@ -324,15 +324,16 @@ The standalone manifest uses Python 3.14 and these dependency ranges:
 | scikit-learn | `>=1.9.1,<2` |
 | PyTorch | `2.13.*` |
 | SciPy | `>=1.18.1,<2` |
+| marimo | `>=0.25.1,<0.26` |
 
-NumPy and pandas permit patch updates. Numba also stays within one minor
-release because it is pre-1.0. The other packages permit minor and patch
+NumPy and pandas permit patch updates. Numba and marimo stay within one minor
+release because they are pre-1.0. The other packages permit minor and patch
 updates within their major version, except PyTorch, which is pinned to one
 series for the reason below. Minimum versions retain the selected
 compatibility baseline. Commit `pixi.lock` alongside the manifest: locked installs
 use its exact versions, rather than choosing new versions from these ranges.
 
-All six scientific packages come from conda-forge. PyTorch uses the `pytorch`
+All seven direct dependencies come from conda-forge. PyTorch uses the `pytorch`
 package with `cpu*` builds, providing a common CPU baseline on Intel and Apple
 Silicon Macs. The full stack supports macOS 12+ on both architectures, Windows
 x86-64, and Linux x86-64 with glibc 2.28+. Official PyPI PyTorch wheels no longer
@@ -376,6 +377,15 @@ lockfile consistent, so no lockfile change was needed. All 19 installer and
 update tests and all six scientific smoke checks passed on Apple Silicon. The
 other three platforms were checked through the lockfile only; runtime testing
 there and GPU testing remain outstanding.
+
+Validation on 26 October 2026 (marimo): `marimo` 0.25.1 resolved and installed
+from conda-forge for all four declared platforms with a Python 3.14 build on
+each, and `cosmos.sh run marimo --version` reported 0.25.1. All 19 installer and
+update tests and all six scientific smoke checks passed on Apple Silicon, with
+PyTorch unchanged at 2.13.0. Notebook execution is exercised in the project
+template, where the example notebook is exported to HTML. Runtime testing on the
+other three platforms remains outstanding, and their marimo builds are so far
+confirmed only through the lockfile.
 
 ## Create a project with the full distribution
 

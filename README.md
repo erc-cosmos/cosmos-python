@@ -15,7 +15,8 @@ Follow either setup option below. These commands are for Mac/Linux; see the
 
 Use an Intel or Apple Silicon Mac with macOS 12+, Windows x86-64, or Linux
 x86-64 with glibc 2.28+. The standalone environment includes NumPy, pandas,
-Numba, SciPy, scikit-learn, and PyTorch with a CPU baseline.
+Numba, SciPy, scikit-learn, and PyTorch with a CPU baseline, plus the marimo
+notebook editor.
 
 From the cosmos-python directory:
 

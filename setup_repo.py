@@ -20,12 +20,14 @@ COPY_FILES = (
 IGNORE_LINES = (
     '.tools/', '.pixi/', '.cache/', '__pycache__/', '*.py[cod]', '*.egg-info/',
     '.pytest_cache/', '.ipynb_checkpoints/', '__marimo__/', '.env', '.env.*',
-    '.DS_Store', 'build/', 'dist/',
+    '.DS_Store', 'build/', 'dist/', 'data/*', '!data/README.md', 'results/*',
+    '!results/README.md',
 )
 # Same list as cosmos-python-template's own .gitignore, in the same order, so the
-# two routes start a project identically. Project data and results stay tracked
-# deliberately: student projects are small, and their datasets and outputs are
-# part of the assessed work.
+# two routes start a project identically. Project data and generated results stay
+# ignored: pushing a project to GitHub publishes everything git can see, and
+# participant data, credentials and large datasets must never be published.
+# Anything meant to be reviewed belongs in a tracked directory such as docs/.
 
 
 def plan(target, python_version, distribution=False):

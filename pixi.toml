@@ -27,6 +27,9 @@ scipy = ">=1.18.1,<2"
 # provides the whole family, including torchaudio. Raise it once torchaudio
 # follows; see GUIDE.md.
 pytorch = { version = "2.13.*", build = "cpu*" }
+# Interactive notebooks, a documented COSMOS workflow. Pre-1.0: keep the minor
+# version fixed, as with Numba.
+marimo = ">=0.25.1,<0.26"
 
 [pypi-dependencies]
 # Put packages unavailable on conda-forge here. Do not list a package in both sections.

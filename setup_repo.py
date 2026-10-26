@@ -17,7 +17,7 @@ COPY_FILES = (
     'bootstrap.sh', 'bootstrap.ps1', 'cosmos.sh', 'cosmos.ps1',
     'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1', 'install.sh', 'install.ps1',
 )
-IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/')
+IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/', '__marimo__/')
 
 
 def plan(target, python_version, distribution=False):

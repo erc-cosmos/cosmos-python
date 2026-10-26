@@ -2,9 +2,13 @@
 .tools/
 .cache/
 __pycache__/
+__marimo__/
 .DS_Store
 .idea/
 .vscode/
 *.py[cod]
 .env
 .env.*
+
+# Local handover notes; not part of the distribution.
+HANDOFF.md

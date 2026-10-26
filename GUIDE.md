@@ -322,12 +322,13 @@ The standalone manifest uses Python 3.14 and these dependency ranges:
 | pandas | `>=3.0.6,<3.1` |
 | Numba | `>=0.68.0,<0.69` |
 | scikit-learn | `>=1.9.1,<2` |
-| PyTorch | `>=2.13.0,<3` |
+| PyTorch | `2.13.*` |
 | SciPy | `>=1.18.1,<2` |
 
 NumPy and pandas permit patch updates. Numba also stays within one minor
 release because it is pre-1.0. The other packages permit minor and patch
-updates within their major version. Minimum versions retain the selected
+updates within their major version, except PyTorch, which is pinned to one
+series for the reason below. Minimum versions retain the selected
 compatibility baseline. Commit `pixi.lock` alongside the manifest: locked installs
 use its exact versions, rather than choosing new versions from these ranges.
 
@@ -339,6 +340,20 @@ support Intel Macs, but conda-forge builds do. GPU configurations require
 separate setup and validation.
 The Python-only template retains its existing four platforms, and generated
 projects choose their own dependencies.
+
+PyTorch is pinned to one series because the conda-forge family does not move as a
+whole. On 26 October 2026, an open range such as `>=2.13.0,<3` resolved `pytorch`
+alone to 2.14.1, but resolved the same manifest plus `torchaudio` back to
+2.13.0, because the newest conda-forge `torchaudio`, 2.11.0, pairs with PyTorch
+2.13. The same manifest therefore answered differently depending on whether
+another package happened to be present, and projects sharing this baseline could
+land on different PyTorch versions without anyone choosing that. Pinning to
+`2.13.*` keeps the family installable, including `torchaudio` and
+`torchvision` 0.28.0, and keeps the manifest and lockfile in agreement. Raise the
+pin when conda-forge ships a `torchaudio` build for a newer PyTorch, which
+`pixi search torchaudio` reports, then update and re-run the smoke checks. Keep
+one torch family inside conda-forge: mixing a conda `pytorch` with PyTorch wheels
+from PyPI produces builds that were never tested together.
 
 Run `bash cosmos.sh run python tests/scientific_smoke.py` after updating the
 standalone lockfile. It checks SciPy linear algebra and optimization, Numba
@@ -354,6 +369,13 @@ versions: NumPy 2.5.3, pandas 3.0.6, Numba 0.68.0, SciPy 1.18.1,
 scikit-learn 1.9.1, and PyTorch 2.13.0. The lockfile also resolves Intel Mac,
 Windows, and Linux environments; runtime testing on those systems and GPU
 testing remain outstanding.
+
+Validation on 26 October 2026: the PyTorch `2.13.*` pin resolved unchanged to
+PyTorch 2.13.0 and libtorch 2.13.0, and `pixi install --locked` reported the
+lockfile consistent, so no lockfile change was needed. All 19 installer and
+update tests and all six scientific smoke checks passed on Apple Silicon. The
+other three platforms were checked through the lockfile only; runtime testing
+there and GPU testing remain outstanding.
 
 ## Create a project with the full distribution
 

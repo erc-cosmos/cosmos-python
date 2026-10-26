@@ -17,7 +17,15 @@ COPY_FILES = (
     'bootstrap.sh', 'bootstrap.ps1', 'cosmos.sh', 'cosmos.ps1',
     'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1', 'install.sh', 'install.ps1',
 )
-IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/')
+IGNORE_LINES = (
+    '.tools/', '.pixi/', '.cache/', '__pycache__/', '*.py[cod]', '*.egg-info/',
+    '.pytest_cache/', '.ipynb_checkpoints/', '__marimo__/', '.env', '.env.*',
+    '.DS_Store', 'build/', 'dist/',
+)
+# Same list as cosmos-python-template's own .gitignore, in the same order, so the
+# two routes start a project identically. Project data and results stay tracked
+# deliberately: student projects are small, and their datasets and outputs are
+# part of the assessed work.
 
 
 def plan(target, python_version, distribution=False):

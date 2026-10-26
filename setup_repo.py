@@ -17,7 +17,12 @@ COPY_FILES = (
     'bootstrap.sh', 'bootstrap.ps1', 'cosmos.sh', 'cosmos.ps1',
     'update.sh', 'update.ps1', 'activate.sh', 'activate.ps1', 'install.sh', 'install.ps1',
 )
-IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/', '__marimo__/')
+IGNORE_LINES = (
+    '.tools/', '.pixi/', '.cache/', '__pycache__/', '__marimo__/', '.pytest_cache/',
+    '.ipynb_checkpoints/', '.DS_Store', '.env', '.env.*', '*.egg-info/', 'build/', 'dist/',
+)
+# Project data and results stay tracked deliberately: student projects are small,
+# and their datasets and outputs are part of the assessed work.
 
 
 def plan(target, python_version, distribution=False):

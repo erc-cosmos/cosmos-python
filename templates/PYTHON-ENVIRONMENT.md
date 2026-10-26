@@ -94,3 +94,15 @@ See [COSMOS-TOOLS.md](COSMOS-TOOLS.md) for upgrading the helper scripts from a n
 cosmos-python checkout. Commit `.cosmos-python.json` with the scripts so future
 updates can detect local modifications. This project guide and the dependency
 manifest/lockfile are preserved by helper updates.
+
+## Full distribution baseline
+
+The installer can use `--distribution` (PowerShell: `-Distribution`) to copy
+the standalone COSMOS manifest and lockfile. `.cosmos-distribution.json` records
+the original dependency constraints and file hashes. It is provenance, not an
+automatic dependency updater. Extra packages go in this project's pixi.toml.
+Helper updates preserve the baseline record and all project requirements.
+To adopt a newer distribution, compare the newer cosmos-python pixi.toml with
+this baseline, deliberately merge the desired constraints into this project's
+manifest, run update and tests, and commit the reviewed manifest and lockfile.
+Never replace a project's lockfile with the standalone lock after adding packages.

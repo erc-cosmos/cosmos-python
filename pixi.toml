@@ -23,7 +23,10 @@ numba = ">=0.68.0,<0.69"
 scikit-learn = ">=1.9.1,<2"
 scipy = ">=1.18.1,<2"
 # CPU builds provide a common baseline across Intel and Apple Silicon Macs.
-pytorch = { version = ">=2.13.0,<3", build = "cpu*" }
+# Pinned to the 2.13 series: it is the newest release for which conda-forge
+# provides the whole family, including torchaudio. Raise it once torchaudio
+# follows; see GUIDE.md.
+pytorch = { version = "2.13.*", build = "cpu*" }
 
 [pypi-dependencies]
 # Put packages unavailable on conda-forge here. Do not list a package in both sections.

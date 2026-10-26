@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Install the COSMOS starter in an existing local directory (Python 3.11+)."""
 import argparse
+import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -18,13 +20,13 @@ COPY_FILES = (
 IGNORE_LINES = ('.tools/', '.pixi/', '.cache/', '__pycache__/')
 
 
-def plan(target, python_version):
+def plan(target, python_version, distribution=False):
     if not target.is_dir():
         raise ValueError('Target must be an existing directory. Clone or create it first.')
     if target == SOURCE:
         raise ValueError('Choose a target other than cosmos-python itself.')
     # Do all configuration checks before writing anything.
-    reserved = (*COPY_FILES, 'pixi.toml', 'pixi.lock', 'PYTHON-ENVIRONMENT.md', 'COSMOS-TOOLS.md', STATE, '.pixi', '.tools')
+    reserved = (*COPY_FILES, 'pixi.toml', 'pixi.lock', 'PYTHON-ENVIRONMENT.md', 'COSMOS-TOOLS.md', '.cosmos-distribution.json', STATE, '.pixi', '.tools')
     conflicts = [name for name in reserved if (target / name).exists() or (target / name).is_symlink()]
     if conflicts:
         raise ValueError('Existing setup files found; nothing changed: ' + ', '.join(conflicts))
@@ -45,14 +47,32 @@ def plan(target, python_version):
         suffix = prefix + ('\n# COSMOS Python local files\n' + '\n'.join(missing) + '\n').encode()
     files = {name: (SOURCE / name).read_bytes() for name in COPY_FILES}
     name = re.sub(r'[^a-z0-9-]+', '-', target.name.lower()).strip('-') or 'cosmos-project'
-    manifest = (SOURCE / 'templates/pixi.toml').read_text(encoding='utf-8')
+    baseline = SOURCE if distribution else SOURCE / 'templates'
+    manifest = (baseline / 'pixi.toml').read_text(encoding='utf-8')
+    if distribution and tomllib.loads(manifest)['dependencies']['python'] != f'{python_version}.*':
+        raise ValueError('--distribution must use the distribution Python version; omit --python.')
     manifest = manifest.replace('name = "cosmos-python"', f'name = "{name}"', 1)
     manifest = manifest.replace('python = "3.14.*"', f'python = "{python_version}.*"', 1)
     files['pixi.toml'] = manifest.encode()
     # Only carry over the generic lock if its Python requirement is unchanged.
     if python_version == '3.14':
-        files['pixi.lock'] = (SOURCE / 'templates/pixi.lock').read_bytes()
+        files['pixi.lock'] = (baseline / 'pixi.lock').read_bytes()
     files['PYTHON-ENVIRONMENT.md'] = (SOURCE / 'templates' / 'PYTHON-ENVIRONMENT.md').read_bytes()
+    if distribution:
+        description = files['PYTHON-ENVIRONMENT.md'].decode()
+        description = description.replace(
+            'The starter initially includes only Python: a maintainer must add the\n'
+            "project's dependencies and validate its code before distributing it as ready to use.",
+            'This project starts from the full COSMOS Python distribution. Additional\n'
+            'project packages belong in pixi.toml. Test changes before sharing them.')
+        files['PYTHON-ENVIRONMENT.md'] = description.encode()
+        files['.cosmos-distribution.json'] = (json.dumps({
+            'schema': 1,
+            'source': 'https://github.com/erc-cosmos/cosmos-python',
+            'manifest_sha256': hashlib.sha256((baseline / 'pixi.toml').read_bytes()).hexdigest(),
+            'lock_sha256': hashlib.sha256(files['pixi.lock']).hexdigest(),
+            'dependencies': tomllib.loads(manifest)['dependencies'],
+        }, indent=2, sort_keys=True) + '\n').encode()
     managed, version, constraint = snapshot(SOURCE)
     files['COSMOS-TOOLS.md'] = managed['COSMOS-TOOLS.md']
     files[STATE] = state_bytes(managed, version, constraint)
@@ -105,6 +125,7 @@ def main():
     parser.add_argument('repository', type=Path, help='Existing local repository directory')
     parser.add_argument('--python', default='3.14', dest='python_version', metavar='3.MINOR',
                         help='Python minor version, e.g. 3.11 or 3.12 (default: 3.14)')
+    parser.add_argument('--distribution', action='store_true', help='Copy the full standalone distribution and its lockfile')
     parser.add_argument('--dry-run', action='store_true', help='Preview without changing the target')
     parser.add_argument('--files-only', action='store_true', help='Write files without downloading/installing the target environment')
     args = parser.parse_args()
@@ -112,7 +133,7 @@ def main():
         parser.error('--python must be a Python 3 minor version >= 3.9, such as 3.11')
     target = args.repository.expanduser().resolve()
     try:
-        files, existing_ignore, suffix = plan(target, args.python_version)
+        files, existing_ignore, suffix = plan(target, args.python_version, args.distribution)
         print(f'Target: {target}', flush=True)
         for name in files:
             print(f'  Create {name}', flush=True)
@@ -131,7 +152,8 @@ def main():
                       'Do not rerun setup-repo: it will protect the files already created.', file=sys.stderr)
                 return 1
         print('Starter ready. See PYTHON-ENVIRONMENT.md in the target repository.')
-        print('This starts with Python only. Add this project\'s requirements and run its tests.')
+        print('Full COSMOS distribution copied.' if args.distribution else 'This starts with Python only.')
+        print('Add project requirements as needed and run its tests.')
         return 0
     except (OSError, ValueError) as exc:
         print(f'Setup stopped: {exc}', file=sys.stderr)

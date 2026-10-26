@@ -3,7 +3,7 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # Capture relative repository paths in the caller's directory before Pixi changes cwd.
 if [ "$#" -eq 0 ]; then
-  echo 'Usage: bash setup-repo.sh REPOSITORY [--python 3.12] [--dry-run] [--files-only]'
+  echo 'Usage: bash setup-repo.sh REPOSITORY [--distribution] [--python 3.12] [--dry-run] [--files-only]'
   exit 1
 fi
 if [[ "$1" = /* ]] || [[ "$1" = -* ]]; then
